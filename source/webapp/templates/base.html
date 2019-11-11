@@ -62,13 +62,24 @@
         </button>
       </div>
       <div class="modal-body">
-          <p>Вы посетили следующие страницы:</p>
+          <p class="text-center">Количество посещений:</p>
           {% for i, b in pages_and_visits.items %}
+              {% if i != '' %}
               <ul>
                   <li>'{{ i }}' - {{ b }} раз</li>
               </ul>
-
+              {% endif %}
           {% endfor %}
+          <p class="text-center">Общее количество посещений : {{ count_sum }}</p>
+          <p class="text-center">Время посещений:</p>
+          {% for i, b in pages_and_time.items %}
+              {% if i != '' %}
+                <ul>
+                  <li>'{{ i }}' - {{ b }} секунд</li>
+              </ul>
+              {% endif %}
+          {% endfor %}
+          <p class="text-center">Общее время посещений : {{ time_sum }}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>

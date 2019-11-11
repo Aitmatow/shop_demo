@@ -5,31 +5,60 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, TemplateView
 from webapp.models import Product, OrderProduct, Order
 from datetime import datetime
+from copy import deepcopy
 
 def context_processor(request):
-    page = []
-    count = []
-    for key,val in request.session.get('get_path').items():
-        page.append(key)
-        count.append(val)
-    return {'pages_and_visits' : request.session.get('get_path')
+    sum = 0
+    time_sum = 0
+    path = request.session.get('get_path', {})
+    time = request.session.get('get_time', {})
+    for key,val in path.items():
+        sum += val
+    for key,val in time.items():
+        time_sum += val
+    # print(request.session.get('get_time'))
+    return {'pages_and_visits' : request.session.get('get_path'),
+            'count_sum' : sum,
+            'pages_and_time' : request.session.get('get_time'),
+            'time_sum' : time_sum
             }
 
 
 class GetUserActionsMixin(object):
     def get(self, request, *args, **kwargs):
         path = self.request.session.get('get_path', {})
-        for key, val in self.request.session['get_path'].items():
-            if self.request.path == key:
-                print(key,val)
-                val += 1
-                path.update({key : val})
-
-        for key,val in self.request.session['get_path'].items():
-            if self.request.path == key:
-                print(key,val)
-
+        time = self.request.session.get('get_time', {})
+        now = datetime.now()
+        time_str = now.strftime('%Y-%m-%d %H:%M:%S')
+        old_time = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
+        old_page = self.request.session.get('old_page', '')
+        diff = 0
+        if self.request.path != old_page:
+            diff = datetime.now() - old_time
+            diff = diff.total_seconds()
+        if not path:
+            path[old_page] = 1
+        else:
+            temp_path = deepcopy(path)
+            for key, val in temp_path.items():
+                if key == self.request.path:
+                    val += 1
+                    path[key] = val
+                else:
+                    path[old_page] = val
+        if not time:
+            time[old_page]  = 0
+        else:
+            temp_time = deepcopy(time)
+            for key,val in temp_time.items():
+                if key == self.request.path:
+                    val += diff
+                    time[key]=val
+                else:
+                    time[old_page] = val
+        self.request.session['old_page'] = self.request.path
         self.request.session['get_path'] = path
+        self.request.session['get_time'] = time
         return super(GetUserActionsMixin, self).get(request, *args, **kwargs)
 
 class IndexView(GetUserActionsMixin, ListView):
@@ -37,7 +66,7 @@ class IndexView(GetUserActionsMixin, ListView):
     template_name = 'index.html'
 
 
-class ProductView(DetailView):
+class ProductView(GetUserActionsMixin,DetailView):
     model = Product
     template_name = 'product/detail.html'
 
