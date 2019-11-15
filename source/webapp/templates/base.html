@@ -23,19 +23,18 @@
             <li class="nav-item"><a href="{% url 'webapp:index' %}" class="nav-link">На главную</a></li>
             {% block menu %}{% endblock %}
         </ul>
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a href="{% url 'webapp:basket' %}" class="nav-link">Корзина ({{ request.session.products_count }})</a></li>
-    </ul>
         <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a href="#statsModal" class="nav-link" data-toggle="modal" data-target="#statsModal">
+                Статистика
+            </a></li>
+            <li class="nav-item"><a href="{% url 'webapp:basket' %}" class="nav-link">
+                Корзина ({{ request.session.products_count|default:0 }})
+            </a></li>
             {% if request.user.is_authenticated %}
                 <li class="nav-item"><a href="{% url 'accounts:detail' request.user.pk %}" class="nav-link">
                     Привет, {{ request.user.username }}!
                 </a></li>
                 <li class="nav-item"><a href="{% url 'accounts:logout' %}" class="nav-link">Выход</a></li>
-                <li class="nav-item"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                  Статистика
-                </button>
-                </li>
             {% else %}
                 <li class="nav-item"><a href="{% url 'accounts:create' %}" class="nav-link">Регистрация</a></li>
                 <li class="nav-item"><a href="{% url 'accounts:login' %}" class="nav-link">Вход</a></li>
@@ -44,49 +43,47 @@
     </div>
 </nav>
 <div class="container mt-3 mb-3">
-    {% block content %}
-    {% endblock %}
+    {% include 'partial/messages.html' %}
+    {% block content %}{% endblock %}
+
+    <div class="modal fade" id="statsModal" tabindex="-1" role="dialog" aria-labelledby="statsModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statsModalLabel">Статистика</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>Вы посетили страницы:</h4>
+                    <ul>
+                        {% for page, count in visits.items %}
+                            <li>{{ page }}: {{ count }} раз(а)</li>
+                        {% endfor %}
+                    </ul>
+                    <p>Всего {{ visits_total }} посещений(я).</p>
+
+                    <h4>Вы провели на сайте:</h4>
+                    <ul>
+                        {% for page, count in times.items %}
+                            <li>{{ page }}: {{ count|stringformat:".2f" }} cекунд(ы)</li>
+                        {% endfor %}
+                    </ul>
+                    <p>Всего {{ times_total|stringformat:".2f" }} секунд(ы)</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Ок</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="{% static 'js/jquery.min.js' %}"></script>
 <script src="{% static 'js/popper.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 <script src="{% static 'js/main.js' %}"></script>
-{% block scripts %}
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Ваша статистика:</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-          <p class="text-center">Количество посещений:</p>
-          {% for i, b in pages_and_visits.items %}
-              {% if i != '' %}
-              <ul>
-                  <li>'{{ i }}' - {{ b }} раз</li>
-              </ul>
-              {% endif %}
-          {% endfor %}
-          <p class="text-center">Общее количество посещений : {{ count_sum }}</p>
-          <p class="text-center">Время посещений:</p>
-          {% for i, b in pages_and_time.items %}
-              {% if i != '' %}
-                <ul>
-                  <li>'{{ i }}' - {{ b }} секунд</li>
-              </ul>
-              {% endif %}
-          {% endfor %}
-          <p class="text-center">Общее время посещений : {{ time_sum }}</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
+{% block scripts %}{% endblock %}
 </body>
 </html>

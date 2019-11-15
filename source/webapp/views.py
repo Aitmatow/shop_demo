@@ -1,86 +1,40 @@
+from collections import deque
+
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.utils.timezone import now
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, TemplateView
+
+from webapp.mixins import StatsMixin
 from webapp.models import Product, OrderProduct, Order
 from datetime import datetime
-from copy import deepcopy
-
-def context_processor(request):
-    sum = 0
-    time_sum = 0
-    path = request.session.get('get_path', {})
-    time = request.session.get('get_time', {})
-    for key,val in path.items():
-        sum += val
-    for key,val in time.items():
-        time_sum += val
-    # print(request.session.get('get_time'))
-    return {'pages_and_visits' : request.session.get('get_path'),
-            'count_sum' : sum,
-            'pages_and_time' : request.session.get('get_time'),
-            'time_sum' : time_sum
-            }
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib import messages
 
 
-class GetUserActionsMixin(object):
-    def get(self, request, *args, **kwargs):
-        path = self.request.session.get('get_path', {})
-        time = self.request.session.get('get_time', {})
-        now = datetime.now()
-        time_str = now.strftime('%Y-%m-%d %H:%M:%S')
-        old_time = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
-        old_page = self.request.session.get('old_page', '')
-        diff = 0
-        if self.request.path != old_page:
-            diff = datetime.now() - old_time
-            diff = diff.total_seconds()
-        if not path:
-            path[old_page] = 1
-        else:
-            temp_path = deepcopy(path)
-            for key, val in temp_path.items():
-                if key == self.request.path:
-                    val += 1
-                    path[key] = val
-                else:
-                    path[old_page] = val
-        if not time:
-            time[old_page]  = 0
-        else:
-            temp_time = deepcopy(time)
-            for key,val in temp_time.items():
-                if key == self.request.path:
-                    val += diff
-                    time[key]=val
-                else:
-                    time[old_page] = val
-        self.request.session['old_page'] = self.request.path
-        self.request.session['get_path'] = path
-        self.request.session['get_time'] = time
-        return super(GetUserActionsMixin, self).get(request, *args, **kwargs)
-
-class IndexView(GetUserActionsMixin, ListView):
+class IndexView(StatsMixin, ListView):
     model = Product
     template_name = 'index.html'
 
 
-class ProductView(GetUserActionsMixin,DetailView):
+class ProductView(StatsMixin,DetailView):
     model = Product
     template_name = 'product/detail.html'
 
 
-class ProductCreateView(GetUserActionsMixin,CreateView):
+class ProductCreateView(PermissionRequiredMixin, StatsMixin, CreateView):
     model = Product
     template_name = 'product/create.html'
     fields = ('name', 'category', 'price', 'photo')
     success_url = reverse_lazy('webapp:index')
+    permission_required = 'webapp.add_product', 'webapp.can_have_piece_of_pizza'
+    permission_denied_message = '403 Доступ запрещён!'
 
 
 
 
-class BasketChangeView(GetUserActionsMixin,View):
+class BasketChangeView(StatsMixin,View):
     def get(self, request, *args, **kwargs):
         products = request.session.get('products', [])
         pk = request.GET.get('pk')
@@ -98,7 +52,7 @@ class BasketChangeView(GetUserActionsMixin,View):
         return redirect(next_url)
 
 
-class BasketView(GetUserActionsMixin,CreateView):
+class BasketView(StatsMixin,CreateView):
     model = Order
     fields = ('first_name', 'last_name', 'phone', 'email')
     template_name = 'product/basket.html'
@@ -117,6 +71,7 @@ class BasketView(GetUserActionsMixin,CreateView):
         response = super().form_valid(form)
         self._save_order_products()
         self._clean_basket()
+        messages.add_message(self.request, messages.SUCCESS, 'Заказ оформлен!')
         return response
 
     def _prepare_basket(self):

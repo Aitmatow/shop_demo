@@ -12,17 +12,13 @@ class ProductAdmin(admin.ModelAdmin):
 
 class OrderProductInline(admin.TabularInline):
     model = OrderProduct
-
     fields = ('product', 'amount')
-
     extra = 1
 
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'phone', 'email', 'created_at')
-
     list_filter = ('status',)
-
     inlines = (OrderProductInline,)
 
 
