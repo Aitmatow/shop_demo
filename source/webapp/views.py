@@ -1,21 +1,25 @@
 from collections import deque
 
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils.timezone import now
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, TemplateView, UpdateView, DeleteView
 
 from webapp.mixins import StatsMixin
 from webapp.models import Product, OrderProduct, Order
 from datetime import datetime
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib import messages
 
 
 class IndexView(StatsMixin, ListView):
     model = Product
     template_name = 'index.html'
+
+    def get_queryset(self):
+        return Product.objects.filter(in_order=True)
 
 
 class ProductView(StatsMixin,DetailView):
@@ -26,11 +30,34 @@ class ProductView(StatsMixin,DetailView):
 class ProductCreateView(PermissionRequiredMixin, StatsMixin, CreateView):
     model = Product
     template_name = 'product/create.html'
-    fields = ('name', 'category', 'price', 'photo')
-    success_url = reverse_lazy('webapp:index')
+    fields = ('name', 'category', 'price', 'photo', 'in_order')
     permission_required = 'webapp.add_product', 'webapp.can_have_piece_of_pizza'
     permission_denied_message = '403 Доступ запрещён!'
 
+    def get_success_url(self):
+        return reverse('webapp:product_detail', kwargs={'pk': self.object.pk})
+
+
+class ProductUpdateView(LoginRequiredMixin, StatsMixin, UpdateView):
+    model = Product
+    template_name = 'product/update.html'
+    fields = ('name', 'category', 'price', 'photo', 'in_order')
+    context_object_name = 'product'
+
+    def get_success_url(self):
+        return reverse('webapp:product_detail', kwargs={'pk': self.object.pk})
+
+class ProductDeleteView(LoginRequiredMixin, StatsMixin, DeleteView):
+    model = Product
+    template_name = 'product/delete.html'
+    success_url = reverse_lazy('webapp:index')
+    context_object_name = 'product'
+
+    def delete(self, request, *args, **kwargs):
+        product = self.object = self.get_object()
+        product.in_order = False
+        product.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 
@@ -41,7 +68,9 @@ class BasketChangeView(StatsMixin,View):
         action = request.GET.get('action')
         next_url = request.GET.get('next', reverse('webapp:index'))
         if action == 'add':
-            products.append(pk)
+            product = get_object_or_404(Product, pk=pk)
+            if product.in_order:
+                products.append(pk)
         else:
             for product_pk in products:
                 if product_pk == pk:
