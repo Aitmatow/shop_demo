@@ -185,7 +185,7 @@ class OrderCancelView(View):
 
 class OrderProductCreateView(CreateView):
     model = OrderProduct
-    template_name = 'order/create_product.html'
+    template_name = 'orderproduct/create.html'
     form_class = OrderProductForm
 
     def form_valid(self, form):
@@ -201,9 +201,19 @@ class OrderProductCreateView(CreateView):
 
 class OrderProductUpdateView(UpdateView):
     model = OrderProduct
-    pass
+    template_name = 'orderproduct/create.html'
+    form_class = OrderProductForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return redirect('webapp:order_detail', self.kwargs.get('id'))
 
 
 class OrderProductDeleteView(DeleteView):
     model = OrderProduct
-    pass
+    template_name = 'orderproduct/delete.html'
+    form_class = OrderProductForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return redirect('webapp:order_detail', self.kwargs.get('id'))

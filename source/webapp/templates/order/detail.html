@@ -26,6 +26,7 @@
                     <tr>
                       <th scope="col">Товар</th>
                       <th scope="col">Количество</th>
+                      <th scope="col">Действия</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -33,6 +34,10 @@
                     <tr>
                       <td>{{ product.product }}</td>
                       <td>{{ product.amount }}</td>
+                    <td>
+                        <a href="{% url 'webapp:order_product_update' product.id order.pk%}" class="btn btn-primary">Изменить</a>
+                        <a href="{% url 'webapp:order_product_delete' product.id order.pk%}" class="btn btn-danger">Удалить</a>
+                    </td>
                     </tr>
                   {% endfor %}
                   </tbody>
