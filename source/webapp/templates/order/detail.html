@@ -29,10 +29,10 @@
                     </tr>
                   </thead>
                   <tbody>
-                  {% for product in order.products.all %}
+                  {% for product in order.orderproduct.all %}
                     <tr>
-                      <td>{{ product.name }}</td>
-                      <td>{{ product.order.name }}</td>
+                      <td>{{ product.product }}</td>
+                      <td>{{ product.amount }}</td>
                     </tr>
                   {% endfor %}
                   </tbody>

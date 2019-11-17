@@ -47,7 +47,7 @@ class ManualOrderForm(ModelForm):
 
     class Meta:
         model = Order
-        fields = ['user', 'first_name', 'last_name', 'email', 'phone']
+        fields = ['user', 'first_name', 'last_name', 'email', 'phone', 'status']
 
 
 class OrderProductForm(ModelForm):

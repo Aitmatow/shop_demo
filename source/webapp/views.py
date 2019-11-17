@@ -7,6 +7,7 @@ from django.utils.timezone import now
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, TemplateView, UpdateView, DeleteView
 
+from webapp.forms import ManualOrderForm
 from webapp.mixins import StatsMixin
 from webapp.models import Product, OrderProduct, Order
 from datetime import datetime
@@ -161,7 +162,8 @@ class OrderDetailView(DetailView):
 
 class OrderCreateView(CreateView):
     model = Order
-    pass
+    template_name = 'order/create.html'
+    form_class = ManualOrderForm
 
 
 class OrderUpdateView(UpdateView):
