@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, TemplateView, UpdateView, DeleteView
 
-from webapp.forms import ManualOrderForm
+from webapp.forms import ManualOrderForm, OrderProductForm
 from webapp.mixins import StatsMixin
 from webapp.models import Product, OrderProduct, Order
 from datetime import datetime
@@ -185,7 +185,18 @@ class OrderCancelView(View):
 
 class OrderProductCreateView(CreateView):
     model = OrderProduct
-    pass
+    template_name = 'order/create_product.html'
+    form_class = OrderProductForm
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        # self.object = form.save()
+        OrderProduct.objects.create(
+            order=Order.objects.get(id=self.kwargs.get('pk')),
+            product=form.cleaned_data['product'],
+            amount=form.cleaned_data['amount']
+        )
+        return redirect('webapp:order_detail', self.kwargs.get('pk'))
 
 
 class OrderProductUpdateView(UpdateView):

@@ -37,7 +37,8 @@
                   {% endfor %}
                   </tbody>
                 </table>
-          <hr>
+            <hr>
+            <p><a href="{% url 'webapp:order_product_create' order.pk %}" class="btn btn-primary">Добавить товар</a></p>
             <p>Статус заказа: {{ order.get_status_display }}</p>
             <p>Телефон: {{ order.phone }}</p>
             <p>Email: {{ order.email }}</p>
