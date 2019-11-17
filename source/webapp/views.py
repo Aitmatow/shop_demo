@@ -213,7 +213,9 @@ class OrderProductDeleteView(DeleteView):
     model = OrderProduct
     template_name = 'orderproduct/delete.html'
     form_class = OrderProductForm
+    context_object_name = 'product'
 
-    def form_valid(self, form):
-        self.object = form.save()
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
         return redirect('webapp:order_detail', self.kwargs.get('id'))
