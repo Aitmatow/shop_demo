@@ -1,7 +1,7 @@
 from collections import deque
 
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse_lazy, reverse
 from django.utils.timezone import now
 from django.views import View
@@ -9,7 +9,7 @@ from django.views.generic import ListView, DetailView, CreateView, TemplateView,
 
 from webapp.forms import ManualOrderForm, OrderProductForm
 from webapp.mixins import StatsMixin
-from webapp.models import Product, OrderProduct, Order
+from webapp.models import Product, OrderProduct, Order, ORDER_STATUS_CHOICES
 from datetime import datetime
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib import messages
@@ -175,12 +175,31 @@ class OrderUpdateView(UpdateView):
 
 class OrderDeliverView(View):
     def get(self, request, *args, **kwargs):
-        pass
+        order=Order.objects.get(id=self.kwargs.get('pk'))
+        context = {
+            'order':order
+        }
+        return render(request, 'order/deliver.html', context)
 
+    def post(self, request, *args, **kwargs):
+        order = Order.objects.get(id=self.kwargs.get('pk'))
+        order.status=ORDER_STATUS_CHOICES[3][0]
+        order.save()
+        return redirect('webapp:order_detail', self.kwargs.get('pk'))
 
 class OrderCancelView(View):
     def get(self, request, *args, **kwargs):
-        pass
+        order=Order.objects.get(id=self.kwargs.get('pk'))
+        context = {
+            'order':order
+        }
+        return render(request, 'order/cancel.html', context)
+
+    def post(self, request, *args, **kwargs):
+        order = Order.objects.get(id=self.kwargs.get('pk'))
+        order.status=ORDER_STATUS_CHOICES[4][0]
+        order.save()
+        return redirect('webapp:order_detail', self.kwargs.get('pk'))
 
 
 class OrderProductCreateView(CreateView):

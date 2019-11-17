@@ -18,6 +18,8 @@
                       <small class="text-muted">
                       <a href="{% url 'webapp:order_detail' order.pk %}" class="btn btn-info" >Открыть</a>
                       <a href="{% url 'webapp:order_update' order.pk %}" class="btn btn-info" >Редактировать</a>
+                      <a href="{% url 'webapp:order_deliver' order.pk %}" class="btn btn-danger" >Доставить</a>
+                      <a href="{% url 'webapp:order_cancel' order.pk %}" class="btn btn-danger" >Отменить</a>
                       </small>
                     </div>
                   </div>
