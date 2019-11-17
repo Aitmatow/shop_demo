@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block menu %}
+<li class="nav-item"><a href="{% url 'webapp:order_create' %}" class="nav-link">Добавить заказ</a></li>
+{% endblock %}
 {% block content %}
     <h1 class="bg-info text-white text-center">Заказы:</h1>
     {% csrf_token %}
@@ -13,15 +16,8 @@
                     </div>
                     <div class="card-footer">
                       <small class="text-muted">
-{#                          {% if not issue.project.status == 'closed' %}#}
-                          <a href="{% url 'webapp:order_detail' order.pk %}" class="btn btn-info" >Открыть</a>
-{#                          <a href="{% url 'issue_update' issue.pk %}" class="btn btn-info" style="width: 40px"><span class="fa fa-edit"></span></a>#}
-{#                          <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-info" style="width: 40px"><span class="fa fa-trash"></span></a>#}
-{#                          {% else %}#}
-{#                           <a href="{% url 'issue_view' issue.pk %}" class="btn btn-info" style="width: 40px"><span class="fa fa-info"></span></a>#}
-{#                          <a href="{% url 'issue_update' issue.pk %}" class="btn btn-info disabled" style="width: 40px"><span class="fa fa-edit"></span></a>#}
-{#                          <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-info disabled" style="width: 40px"><span class="fa fa-trash"></span></a>#}
-{#                          {% endif %}#}
+                      <a href="{% url 'webapp:order_detail' order.pk %}" class="btn btn-info" >Открыть</a>
+                      <a href="{% url 'webapp:order_update' order.pk %}" class="btn btn-info" >Редактировать</a>
                       </small>
                     </div>
                   </div>
