@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1 class="bg-info text-white text-center">Заказы:</h1>
+    {% csrf_token %}
+    <div class="card-deck text-center">
+            {% for order in orders %}
+                <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title"> Заказ от {{ order.last_name }} {{ order.first_name }}</h5>
+                      <p class="card-text">Телефон : {{ order.phone }}</p>
+                      <p class="card-text">Email : {{ order.email }}</p>
+                      <p class="card-text">Дата создания : {{ order.created_at }}</p>
+                    </div>
+                    <div class="card-footer">
+                      <small class="text-muted">
+{#                          {% if not issue.project.status == 'closed' %}#}
+                          <a href="{% url 'webapp:order_detail' order.pk %}" class="btn btn-info" >Открыть</a>
+{#                          <a href="{% url 'issue_update' issue.pk %}" class="btn btn-info" style="width: 40px"><span class="fa fa-edit"></span></a>#}
+{#                          <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-info" style="width: 40px"><span class="fa fa-trash"></span></a>#}
+{#                          {% else %}#}
+{#                           <a href="{% url 'issue_view' issue.pk %}" class="btn btn-info" style="width: 40px"><span class="fa fa-info"></span></a>#}
+{#                          <a href="{% url 'issue_update' issue.pk %}" class="btn btn-info disabled" style="width: 40px"><span class="fa fa-edit"></span></a>#}
+{#                          <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-info disabled" style="width: 40px"><span class="fa fa-trash"></span></a>#}
+{#                          {% endif %}#}
+                      </small>
+                    </div>
+                  </div>
+            {% endfor %}
+    </div>
+{% endblock %}
+{% block scripts %}
+{#    {% if perms.webapp.add_issue %}#}
+{#    <a href="{% url 'add_issue' %}" class="button2" tabindex="0">+</a>#}
+{#    {% endif %}#}
+{% endblock %}

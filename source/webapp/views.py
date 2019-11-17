@@ -60,7 +60,6 @@ class ProductDeleteView(LoginRequiredMixin, StatsMixin, DeleteView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-
 class BasketChangeView(StatsMixin,View):
     def get(self, request, *args, **kwargs):
         products = request.session.get('products', [])
@@ -139,3 +138,57 @@ class BasketView(StatsMixin,CreateView):
             self.request.session.pop('products')
         if 'products_count' in self.request.session:
             self.request.session.pop('products_count')
+
+class OrderListView(ListView):
+    template_name = 'order/list.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        if self.request.user.has_perm('webapp:view_order'):
+            return Order.objects.all().order_by('-created_at')
+        return self.request.user.orders.all().order_by('-created_at')
+
+
+class OrderDetailView(DetailView):
+    template_name = 'order/detail.html'
+    context_object_name = 'order'
+
+    def get_queryset(self):
+        if self.request.user.has_perm('webapp:view_order'):
+            return Order.objects.all()
+        return self.request.user.orders.all()
+
+
+class OrderCreateView(CreateView):
+    model = Order
+    pass
+
+
+class OrderUpdateView(UpdateView):
+    model = Order
+    pass
+
+
+class OrderDeliverView(View):
+    def get(self, request, *args, **kwargs):
+        pass
+
+
+class OrderCancelView(View):
+    def get(self, request, *args, **kwargs):
+        pass
+
+
+class OrderProductCreateView(CreateView):
+    model = OrderProduct
+    pass
+
+
+class OrderProductUpdateView(UpdateView):
+    model = OrderProduct
+    pass
+
+
+class OrderProductDeleteView(DeleteView):
+    model = OrderProduct
+    pass
