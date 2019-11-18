@@ -144,7 +144,7 @@ class BasketView(StatsMixin,CreateView):
         if 'products_count' in self.request.session:
             self.request.session.pop('products_count')
 
-class OrderListView(StatsMixin,ListView):
+class OrderListView(StatsMixin,LoginRequiredMixin,ListView):
     template_name = 'order/list.html'
     context_object_name = 'orders'
 
