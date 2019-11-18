@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block menu %}
-<li class="nav-item"><a href="{% url 'webapp:order_create' %}" class="nav-link">Добавить заказ</a></li>
+    {% if perms.webapp.add_order %}
+        <li class="nav-item"><a href="{% url 'webapp:order_create' %}" class="nav-link">Добавить заказ</a></li>
+    {% endif %}
 {% endblock %}
 {% block content %}
     <h1 class="bg-info text-white text-center">Заказы:</h1>
@@ -18,8 +20,12 @@
                       <small class="text-muted">
                       <a href="{% url 'webapp:order_detail' order.pk %}" class="btn btn-info" >Открыть</a>
                       <a href="{% url 'webapp:order_update' order.pk %}" class="btn btn-info" >Редактировать</a>
-                      <a href="{% url 'webapp:order_deliver' order.pk %}" class="btn btn-danger" >Доставить</a>
-                      <a href="{% url 'webapp:order_cancel' order.pk %}" class="btn btn-danger" >Отменить</a>
+                      {% if perms.webapp.deliver_order %}
+                          <a href="{% url 'webapp:order_deliver' order.pk %}" class="btn btn-danger" >Доставить</a>
+                      {% endif %}
+                      {% if perms.webapp.cancel_order %}
+                          <a href="{% url 'webapp:order_cancel' order.pk %}" class="btn btn-danger" >Отменить</a>
+                      {% endif %}
                       </small>
                     </div>
                   </div>

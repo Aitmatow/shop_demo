@@ -54,6 +54,10 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
+        permissions = [
+            ('deliver_order', 'Доставка заказа'),
+            ('cancel_order', 'Отмена заказа')
+        ]
 
 
 class OrderProduct(models.Model):
