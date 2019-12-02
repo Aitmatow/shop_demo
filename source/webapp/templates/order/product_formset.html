@@ -1,0 +1,30 @@
+{{ formset.management_form }}
+
+{% for error in formset.non_form_errors %}
+    <p class="text-danger">{{ error }}</p>
+{% endfor %}
+
+<div id="product_forms">
+    {% for product_form in formset %}
+        <div class="form-row" id="order_products-{{ forloop.counter0 }}">
+            <div class="form-group col-md-5">
+                {% include 'partial/form_field.html' with field=product_form.product %}
+            </div>
+            <div class="form-group col-md-5">
+                {% include 'partial/form_field.html' with field=product_form.amount %}
+            </div>
+            <div class="form-group col-md-2 text-center">
+                <button type="button" class="btn btn-danger mt-md-3" data-id="order_products-{{ forloop.counter0 }}">Удалить товар
+                </button>
+            </div>
+            <div class="d-none">
+                {{ product_form.id }}
+                {% if formset.can_delete %}{{ product_form.DELETE }}{% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="form-group text-center">
+    <button type="button" id="add_product_form" class="btn btn-success">Добавить ещё товар</button>
+</div>
