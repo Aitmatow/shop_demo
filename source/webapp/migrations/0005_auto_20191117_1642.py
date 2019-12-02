@@ -12,8 +12,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='orderproduct',
+            model_name='order_product',
             name='order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orderproduct', to='webapp.Order', verbose_name='Заказ'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='order_product', to='webapp.Order', verbose_name='Заказ'),
         ),
     ]

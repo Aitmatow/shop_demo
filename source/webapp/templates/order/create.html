@@ -1,9 +1,30 @@
 {% extends 'base.html' %}
-{% block title %}Добавить заказ{% endblock %}
+{% load staticfiles %}
+
 {% block content %}
-    <h1 class="text-center">Создать заказ</h1>
-    <form action="{% url "webapp:order_create" %}" method="POST" enctype="multipart/form-data">
+    <h1 class="text-center">Добавить заказ</h1>
+    <form method="post" action="{% url 'webapp:order_create' %}">
         {% include 'partial/form.html' %}
-        <input type="submit" value="Создать" class="btn btn-primary">
+        <h3 class="text-center my-3">Товары</h3>
+        {% include 'order/product_formset.html' %}
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
     </form>
+{% endblock %}
+
+{% block scripts %}
+    <script type="application/javascript">
+        // Добавлено в качестве примера, как передать переменные из контекста Django в JS.
+        // (нужно вывести их в шаблоне внутри js-кода внутри тега <script> так,
+        // чтобы после рендера получился валидный код на js со значениями этих переменных.)
+        // Последующие скрипты будут иметь доступ к этим переменным после того, как загрузятся.
+        let productOptions = {
+            {% for product in product_list %}
+            {{ product.pk }}: "{{ product.name }}"{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        };
+    </script>
+
+    <script type="application/javascript" src="{% static "js/product_formset.js" %}"></script>
 {% endblock %}

@@ -6,7 +6,7 @@ from .models import Profile
 
 class ProfileInline(admin.StackedInline):
     model = Profile
-    fields = ['birth_date', 'avatar']
+    exclude = []
 
 
 class ProfileAdmin(UserAdmin):

@@ -1,56 +1,88 @@
 {% extends 'base.html' %}
-{% block title %}{{ object.name }}{% endblock %}
-{#{% block menu %}{% if not object.project.status == 'closed' %}#}
-{#    <li class="nav-item dropdown">#}
-{#        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#}
-{#          Действия#}
-{#        </a>#}
-{#        <div class="dropdown-menu" aria-labelledby="navbarDropdown">#}
-{#            <a class="dropdown-item" href="{% url 'issue_update' object.pk%} ">Редактирование</a>#}
-{#            <a class="dropdown-item" href="{% url 'issue_delete' object.pk%} ">Удаление</a>#}
-{#        </div>#}
-{#      </li>{% endif %}#}
-{#{% endblock %}#}
+
+{% block menu %}
+    {% if perms.webapp.change_order %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'webapp:order_update' order.pk %}">Изменить</a></li>
+    {% endif %}
+    {% if perms.webapp.deliver_order %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'webapp:order_deliver' order.pk %}">Доставить</a></li>
+    {% endif %}
+    {% if perms.webapp.delete_order %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'webapp:order_cancel' order.pk %}">Отменить</a></li>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-   <div class="container">
-       <div class="card text-center">
-          <div class="card-header">
-            Заказ
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">Заказ от {{ order.first_name }} {{ order.last_name }}</h5>
-            <p class="card-text">
-              <p> Список : </p>
-                  <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Товар</th>
-                      <th scope="col">Количество</th>
-                      <th scope="col">Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  {% for product in order.orderproduct.all %}
-                    <tr>
-                      <td>{{ product.product }}</td>
-                      <td>{{ product.amount }}</td>
-                    <td>
-                        <a href="{% url 'webapp:order_product_update' product.id order.pk%}" class="btn btn-primary">Изменить</a>
-                        <a href="{% url 'webapp:order_product_delete' product.id order.pk%}" class="btn btn-danger">Удалить</a>
-                    </td>
-                    </tr>
-                  {% endfor %}
-                  </tbody>
-                </table>
-            <hr>
-            <p><a href="{% url 'webapp:order_product_create' order.pk %}" class="btn btn-primary">Добавить товар</a></p>
-            <p>Статус заказа: {{ order.get_status_display }}</p>
-            <p>Телефон: {{ order.phone }}</p>
-            <p>Email: {{ order.email }}</p>
-          </div>
-          <div class="card-footer text-muted">
-              <p>Дата создания : {{ order.created_at }} </p>
-          </div>
-        </div>
-   </div>
+    <h1 class="text-center">Заказ от {{ order.created_at|date:'Y-m-d H:i:s' }} ({{ order.get_status_display }})</h1>
+    <p>
+        Имя:
+        {% if order.first_name %}
+            {{ order.first_name }}
+        {% else %}
+            {% if order.user %}
+                {{ order.user.first_name }}
+            {% endif %}
+        {% endif %}
+        {% if order.last_name %}
+            {{ order.last_name }}
+        {% else %}
+            {% if order.user %}
+                {{ order.user.last_name }}
+            {% endif %}
+        {% endif %}
+    </p>
+    <p>
+        Email:
+        {% if order.email %}
+            {{ order.email }}
+        {% else %}
+            {% if order.user.email %}
+                {{ order.user.email }}
+            {% endif %}
+        {% endif %}
+    </p>
+    <p>Телефон: {{ order.phone }}</p>
+    <h3 class="text-center my-3">Товары в заказе</h3>
+    <p class="text-center">
+        {% if perms.webapp.add_orderproduct %}
+            <a href="{% url "webapp:order_add_product" order.pk %}">Добавить товар</a>
+        {% endif %}
+    </p>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Товар</th>
+            <th scope="col">Цена</th>
+            <th scope="col">Количество</th>
+            <th scope="col">Итого</th>
+            <th colspan="2" class="text-center">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in order.order_products.all %}
+            <tr>
+                <td><a href="{% url 'webapp:product_detail' item.product.pk %}">{{ item.product.name }}</a></td>
+                <td>{{ item.product.price }}</td>
+                <td>{{ item.amount }}</td>
+                <td>{{ item.get_total|floatformat:2 }}</td>
+                <td>
+                    {% if perms.webapp.change_orderproduct %}
+                        <a href="{% url 'webapp:order_product_update' item.pk %}">Редактировать</a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if perms.webapp.delete_orderproduct %}
+                        <a href="{% url 'webapp:order_product_delete' item.pk %}">Удалить</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <th colspan="3">Итого:</th>
+            <td colspan="3">{{ order.get_total|floatformat:2 }}</td>
+        </tr>
+        </tfoot>
+    </table>
 {% endblock %}

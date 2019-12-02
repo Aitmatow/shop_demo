@@ -1,39 +1,56 @@
 {% extends 'base.html' %}
-{% block menu %}
-    {% if perms.webapp.add_order %}
-        <li class="nav-item"><a href="{% url 'webapp:order_create' %}" class="nav-link">Добавить заказ</a></li>
-    {% endif %}
-{% endblock %}
+
 {% block content %}
-    <h1 class="bg-info text-white text-center">Заказы:</h1>
-    {% csrf_token %}
-    <div class="card-deck text-center">
-            {% for order in orders %}
-                <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title"> Заказ от {{ order.last_name }} {{ order.first_name }}</h5>
-                      <p class="card-text">Телефон : {{ order.phone }}</p>
-                      <p class="card-text">Email : {{ order.email }}</p>
-                      <p class="card-text">Дата создания : {{ order.created_at }}</p>
-                    </div>
-                    <div class="card-footer">
-                      <small class="text-muted">
-                      <a href="{% url 'webapp:order_detail' order.pk %}" class="btn btn-info" >Открыть</a>
-                      <a href="{% url 'webapp:order_update' order.pk %}" class="btn btn-info" >Редактировать</a>
-                      {% if perms.webapp.deliver_order %}
-                          <a href="{% url 'webapp:order_deliver' order.pk %}" class="btn btn-danger" >Доставить</a>
-                      {% endif %}
-                      {% if perms.webapp.cancel_order %}
-                          <a href="{% url 'webapp:order_cancel' order.pk %}" class="btn btn-danger" >Отменить</a>
-                      {% endif %}
-                      </small>
-                    </div>
-                  </div>
-            {% endfor %}
-    </div>
-{% endblock %}
-{% block scripts %}
-{#    {% if perms.webapp.add_issue %}#}
-{#    <a href="{% url 'add_issue' %}" class="button2" tabindex="0">+</a>#}
-{#    {% endif %}#}
+    <h1 class="text-center mb-3">Заказы</h1>
+    {% for order in orders %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <p class="card-text text-right">{{ order.created_at|date:'Y-m-d H:i:s' }} ({{ order.get_status_display }})</p>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Имя:
+                    {% if order.first_name %}
+                        {{ order.first_name }}
+                    {% else %}
+                        {% if order.user %}
+                            {{ order.user.first_name }}
+                        {% endif %}
+                    {% endif %}
+                    {% if order.last_name %}
+                        {{ order.last_name }}
+                    {% else %}
+                        {% if order.user %}
+                            {{ order.user.last_name }}
+                        {% endif %}
+                    {% endif %}
+                </p>
+                <p class="card-text">
+                    Email:
+                    {% if order.email %}
+                        {{ order.email }}
+                    {% else %}
+                        {% if order.user.email %}
+                            {{ order.user.email }}
+                        {% endif %}
+                    {% endif %}
+                </p>
+                <p class="card-text">Телефон: {{ order.phone }}</p>
+            </div>
+            <div class="card-footer">
+                {% if perms.webapp.view_order or request.user == order.user %}
+                    <a class="card-link" href="{% url 'webapp:order_detail' order.pk %}">Просмотреть</a>
+                {% endif %}
+                {% if perms.webapp.change_order %}
+                    <a class="card-link" href="{% url 'webapp:order_update' order.pk %}">Изменить</a>
+                {% endif %}
+                {% if perms.webapp.deliver_order %}
+                    <a class="card-link" href="{% url 'webapp:order_deliver' order.pk %}">Доставить</a>
+                {% endif %}
+                {% if perms.webapp.delete_order %}
+                    <a class="card-link" href="{% url 'webapp:order_cancel' order.pk %}">Отменить</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
 {% endblock %}

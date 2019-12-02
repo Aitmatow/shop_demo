@@ -1,0 +1,10 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center">Поменять товар в заказе {{ order_product.order }}</h1>
+    <form method="post" action="{% url 'webapp:order_product_update' order_product.pk %}">
+        {% include 'partial/form.html' %}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+{% endblock %}

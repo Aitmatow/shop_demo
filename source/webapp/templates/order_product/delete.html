@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center">Вы уверены, что хотите удалить товар в заказе {{ order_product }}?</h1>
+    <form method="post" action="{% url 'webapp:order_product_delete' order_product.pk %}" class="text-center">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да</button>
+        <a class="btn btn-secondary" href="{% url 'webapp:order_detail' order_product.order.pk %}">Отмена</a>
+    </form>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm
+from django.forms import ModelForm, inlineformset_factory
 
 from webapp.models import Order, OrderProduct
 
@@ -12,16 +12,16 @@ class BasketOrderCreateForm(ModelForm):
         super().__init__(**kwargs)
 
     def clean_first_name(self):
-        if not self.user and not self.cleaned_data.get('first_name'):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name and not self.user:
             raise ValidationError('Вы должны авторизоваться либо указать ваше имя!')
+        return first_name
 
     def clean_email(self):
-        if not self.user and not self.cleaned_data.get('email'):
+        email = self.cleaned_data.get('email')
+        if not email and not self.user:
             raise ValidationError('Вы должны авторизоваться либо указать ваш email!')
-
-    def clean_phone(self):
-        if not self.user and not self.cleaned_data.get('phone'):
-            raise ValidationError('Вы должны авторизоваться либо указать ваш телефон!')
+        return email
 
     def save(self, commit=True):
         self.instance.user = self.user
@@ -34,23 +34,27 @@ class BasketOrderCreateForm(ModelForm):
 
 class ManualOrderForm(ModelForm):
     def clean_first_name(self):
-        if not self.user and not self.cleaned_data.get('first_name'):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name and not self.cleaned_data.get('user'):
             raise ValidationError('Вы должны указать пользователя либо его имя!')
+        return first_name
 
     def clean_email(self):
-        if not self.user and not self.cleaned_data.get('email'):
+        email = self.cleaned_data.get('email')
+        if not email and not self.cleaned_data.get('user'):
             raise ValidationError('Вы должны указать пользователя либо его email!')
-
-    def clean_phone(self):
-        if not self.user and not self.cleaned_data.get('phone'):
-            raise ValidationError('Вы должны указать пользователя либо его телефон!')
+        return email
 
     class Meta:
         model = Order
-        fields = ['user', 'first_name', 'last_name', 'email', 'phone', 'status']
+        fields = ['user', 'first_name', 'last_name', 'email', 'phone']
 
 
 class OrderProductForm(ModelForm):
     class Meta:
         model = OrderProduct
         fields = ['product', 'amount']
+
+
+ProductsFormset = inlineformset_factory(Order, OrderProduct, OrderProductForm, extra=0,
+                                        validate_min=True, min_num=1, can_delete=True)
